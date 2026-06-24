@@ -1,0 +1,15 @@
+{
+  "games": {
+    "Elden Ring": {
+      "chapters": {
+        "Liurnia": {
+          "bosses": {
+            "Tree Sentinel": {
+              "deaths": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

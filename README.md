@@ -1,46 +1,34 @@
-# Kivy Android APK Base
+# Death Counter
 
-This project is a minimal Kivy app scaffold intended to be built into an Android APK using Buildozer.
+Small app to track deaths per game, chapter/area, and boss. Data is stored in `deaths.json`.
 
-Prerequisites (recommended):
-- Linux or WSL (Buildozer requires Linux environment)
-- Python 3.10+
-- Buildozer (install via `pip install buildozer` in Linux)
+Usage
+-----
 
-Quick build steps (on Linux/WSL):
+- Run the GUI (Tkinter is included with CPython):
 
-```bash
-# Install buildozer and dependencies
-pip install --user buildozer
-
-# Initialize build environment (first time)
-buildozer android debug
-
-# Build APK
-buildozer -v android debug
-
-# Deploy to device
-buildozer android deploy run
-```
-
-Files:
-- `main.py` - minimal Kivy app
-- `buildozer.spec` - build configuration
-- `requirements.txt` - Python dependencies
-
-Notes:
-- Buildozer only runs on Linux. Use WSL2 on Windows.
-- Adjust `buildozer.spec` for icons, permissions, and dependencies as needed.
-
-Death Counter CLI
------------------
-
-This repository now includes a simple CLI tool to track deaths per game, chapter/area, and boss.
-
-Run it with:
-
-```bash
+```powershell
 python main.py
 ```
 
-Commands are listed in the interactive prompt (type `help`). Data is saved to `deaths.json`.
+- Force the CLI:
+
+```powershell
+python main.py --cli
+```
+
+Windows launchers
+-----------------
+
+Two simple batch files are included for convenience on Windows:
+
+- `run-ui.bat` — launches the GUI (runs `python main.py`)
+- `run-cli.bat` — launches the CLI (runs `python main.py --cli`)
+
+Double-click a `.bat` file or run it from PowerShell to start the app.
+
+Notes
+-----
+
+- This project no longer depends on Kivy. The GUI uses Tkinter so no extra packages are required for the UI.
+- If you want a packaged desktop app later, I can add a PyInstaller script to produce an EXE.

@@ -6,6 +6,7 @@ Data is persisted to `deaths.json` in the project folder.
 
 import json
 import os
+import argparse
 from pathlib import Path
 
 DATA_FILE = Path("deaths.json")
@@ -18,6 +19,8 @@ def load_data():
 
 
 def save_data(data):
+    # Ensure aggregated totals are up-to-date before saving
+    recompute_all(data)
     DATA_FILE.write_text(json.dumps(data, indent=2))
 
 
@@ -34,6 +37,31 @@ def ensure_chapter(game, chapter_name):
 def ensure_boss(chapter, boss_name):
     bosses = chapter.setdefault("bosses", {})
     return bosses.setdefault(boss_name, {"deaths": 0})
+
+
+def recompute_chapter(data, game_name, chapter_name):
+    chapter = data["games"][game_name]["chapters"][chapter_name]
+    bosses = chapter.get("bosses", {})
+    boss_sum = sum(b.get("deaths", 0) for b in bosses.values())
+    manual = chapter.get("deaths_manual", 0)
+    chapter["deaths"] = boss_sum + manual
+    return chapter["deaths"]
+
+
+def recompute_game(data, game_name):
+    game = data["games"][game_name]
+    chapters = game.get("chapters", {})
+    total = sum(c.get("deaths", 0) for c in chapters.values())
+    manual = game.get("deaths_manual", 0)
+    game["deaths"] = total + manual
+    return game["deaths"]
+
+
+def recompute_all(data):
+    for gname, gdat in data.get("games", {}).items():
+        for cname in gdat.get("chapters", {}):
+            recompute_chapter(data, gname, cname)
+        recompute_game(data, gname)
 
 
 def add_game(data):
@@ -55,7 +83,8 @@ def add_chapter(data):
     if not chapter:
         print("Cancelled")
         return
-    ensure_chapter(data["games"][game_name], chapter)
+    ch = ensure_chapter(data["games"][game_name], chapter)
+    ch.setdefault("deaths_manual", 0)
     save_data(data)
     print(f"Added chapter '{chapter}' to game '{game_name}'")
 
@@ -75,6 +104,11 @@ def add_boss(data):
         print("Cancelled")
         return
     ensure_boss(chapters[chapter_name], boss)
+    # ensure manual counters exist
+    chapters[chapter_name].setdefault("deaths_manual", 0)
+    # recompute aggregates and save
+    recompute_chapter(data, game_name, chapter_name)
+    recompute_game(data, game_name)
     save_data(data)
     print(f"Added boss '{boss}' in '{chapter_name}' of '{game_name}'")
 
@@ -86,10 +120,11 @@ def increment_death(data):
         return
     chapter_name = input("Chapter/Area name (leave blank to increment game total): ").strip()
     if not chapter_name:
-        # increment a generic game-wide counter
+        # increment a generic game-wide manual counter
         game = data["games"][game_name]
-        game.setdefault("deaths", 0)
-        game["deaths"] += 1
+        game.setdefault("deaths_manual", 0)
+        game["deaths_manual"] += 1
+        recompute_game(data, game_name)
         save_data(data)
         print(f"Incremented death for game '{game_name}' (total now {game['deaths']})")
         return
@@ -100,8 +135,11 @@ def increment_death(data):
     boss_name = input("Boss name (leave blank to increment chapter total): ").strip()
     chapter = chapters[chapter_name]
     if not boss_name:
-        chapter.setdefault("deaths", 0)
-        chapter["deaths"] += 1
+        # increment chapter manual counter
+        chapter.setdefault("deaths_manual", 0)
+        chapter["deaths_manual"] += 1
+        recompute_chapter(data, game_name, chapter_name)
+        recompute_game(data, game_name)
         save_data(data)
         print(f"Incremented death for chapter '{chapter_name}' (total now {chapter['deaths']})")
         return
@@ -111,6 +149,9 @@ def increment_death(data):
         return
     bosses[boss_name].setdefault("deaths", 0)
     bosses[boss_name]["deaths"] += 1
+    # recompute chapter and game totals
+    recompute_chapter(data, game_name, chapter_name)
+    recompute_game(data, game_name)
     save_data(data)
     print(f"Incremented death for boss '{boss_name}' (total now {bosses[boss_name]['deaths']})")
 
@@ -212,4 +253,25 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    VERSION = "death-counter 0.1.0"
+    parser = argparse.ArgumentParser(description="Death Counter — GUI (Tkinter) by default, or CLI with --cli")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--cli", action="store_true", help="run the command-line interface")
+    parser.add_argument("--version", action="version", version=VERSION)
+    args = parser.parse_args()
+    # detect Tkinter UI
+    try:
+        import ui_tk
+        have_tk = True
+    except Exception:
+        have_tk = False
+
+    if args.cli:
+        main()
+    else:
+        # default: prefer Tkinter UI if available, else CLI
+        if have_tk:
+            ui_tk.run_tk()
+        else:
+            print("No GUI available; running CLI")
+            main()

@@ -1,1 +1,1 @@
-kivy
+# No external runtime dependencies. The project uses Tkinter (included with CPython).
