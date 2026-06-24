@@ -31,3 +31,16 @@ Files:
 Notes:
 - Buildozer only runs on Linux. Use WSL2 on Windows.
 - Adjust `buildozer.spec` for icons, permissions, and dependencies as needed.
+
+Death Counter CLI
+-----------------
+
+This repository now includes a simple CLI tool to track deaths per game, chapter/area, and boss.
+
+Run it with:
+
+```bash
+python main.py
+```
+
+Commands are listed in the interactive prompt (type `help`). Data is saved to `deaths.json`.
