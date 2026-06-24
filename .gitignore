@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+pip-log.txt
+pip-delete-this-directory.txt
+env/
+venv/
+ENV/
+.env
+.venv
+
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Installer logs
+pip-log.txt
+
+# IDEs
+.vscode/
+.idea/
+
+# Buildozer
+.buildozer/
+
+# Android
+*.apk
+*.aab
+.gradle/
+local.properties
+
+# Misc
+.DS_Store
+*.log
