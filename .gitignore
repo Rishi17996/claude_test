@@ -41,3 +41,8 @@ local.properties
 # Misc
 .DS_Store
 *.log
+
+# Generated data files
+deaths.json
+deaths-export.json
+deaths-*.json
